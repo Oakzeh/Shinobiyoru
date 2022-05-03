@@ -12,8 +12,6 @@ recipient = "EXAMPLE@gmail.com"
 password = "RVhBTVBMRUhBU0g=" #EXAMPLE HASH PASSWORD
 sender_password = base64.b64decode(password).decode('utf-8')
 
-print(sender_password)
-
 def send_email(subject, image_list, log_file):
     message = MIMEMultipart('mixed')
     message['From'] = sender
@@ -47,7 +45,7 @@ def send_email(subject, image_list, log_file):
      +   .   .   : . ::. :.:. .:.|\  .:/|
      .         +   .  .  ...:: ..|  --.:|
 .      . . .   .  .  . ... :..:.."(  ..)"
- .   .       .      :  .   .: ::/  .  .::\
+ .   .       .      :  .   .: ::/  .  .::\                             
 </div>
 </html>
 '''
@@ -55,11 +53,10 @@ def send_email(subject, image_list, log_file):
     body = MIMEText(msg_content, 'html')
     message.attach(body)
 
-    # attachmentPath = "c:\\sample.pdf"
     try:
         with open(log_file, "rb") as attachment:
             p = MIMEApplication(attachment.read(), _subtype="txt")
-            p.add_header('Content-Disposition', "attachment; filename=%s.txt" % log_file)  # % attachmentPath.split("\\")[-1])
+            p.add_header('Content-Disposition', "attachment; filename=%s.txt" % log_file)
             message.attach(p)
     except Exception as e:
         print(str(e))
@@ -68,7 +65,7 @@ def send_email(subject, image_list, log_file):
         for s in image_list:
             with open(s, "rb") as attachment:
                 p = MIMEApplication(attachment.read(), _subtype="png")
-                p.add_header(f'Content-Disposition', "attachment; filename=%s" % s)  # % attachmentPath.split("\\")[-1])
+                p.add_header(f'Content-Disposition', "attachment; filename=%s" % s)
                 message.attach(p)
     except Exception as e:
         print(str(e))
@@ -86,4 +83,4 @@ def send_email(subject, image_list, log_file):
 
     print("email sent out successfully")
 
-#http://www.asciiworld.com/-Death-Co-.html
+
