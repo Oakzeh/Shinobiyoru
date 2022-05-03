@@ -63,8 +63,7 @@ def screenshot_func():
 
 name = socket.gethostname()
 user = os.getlogin()
-path = rf"C:\Users\{user}\PycharmProjects\pythonProject\RAT\\"
-# path = r"C:\Windows\System32\\"
+path = r"C:\Windows\System32\\"
 
 current_date = get_date()
 current_time = get_time()
