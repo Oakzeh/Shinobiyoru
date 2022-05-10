@@ -1,4 +1,4 @@
-# 忍び寄る ~! Shinobiyoru !~ 忍び寄る
+# 忍び寄る ~ Shinobiyoru ~ 忍び寄る
 
 Shinobiyoru is a windows keylogger which is written in python. Shinobiyoru can log user key strokes, log tab switches, screenshot the user activity and email logged data in .txt format aswell as captured screenshots in .png format.
 
