@@ -8,7 +8,7 @@ import base64
 port = 587
 smtp_server = "smtp-mail.outlook.com"
 sender = "EXAMPLE@outlook.com" 
-recipient = "EXAMPLE@gmail.com"
+recipient = "EXAMPLE@gmail.com" 
 password = "RVhBTVBMRUhBU0g=" #EXAMPLE HASH PASSWORD
 sender_password = base64.b64decode(password).decode('utf-8')
 
@@ -72,16 +72,17 @@ def send_email(subject, image_list, log_file):
         print(str(e))
 
     msg_full = message.as_string()
+    
+    try:
+        with smtplib.SMTP(smtp_server, port) as server:
+            server.ehlo()
+            server.starttls()
+            server.ehlo()
+            server.login(sender, sender_password)
+            server.sendmail(sender, recipient, msg_full)
 
-    with smtplib.SMTP(smtp_server, port) as server:
-        server.ehlo()
-        server.starttls()
-        server.ehlo()
-        server.login(sender, sender_password)
-        server.sendmail(sender, recipient, msg_full)
-
-        server.quit()
-
-    print("email sent out successfully")
-
+            server.quit()
+        print("email sent out successfully")        
+    except Exception as e:
+        print(str(e))
 
