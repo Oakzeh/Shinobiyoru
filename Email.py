@@ -80,9 +80,9 @@ def send_email(subject, image_list, log_file):
             server.ehlo()
             server.login(sender, sender_password)
             server.sendmail(sender, recipient, msg_full)
-
             server.quit()
-        print("email sent out successfully")        
+        #print("email sent out successfully")   
+        
     except Exception as e:
         print(str(e))
 
